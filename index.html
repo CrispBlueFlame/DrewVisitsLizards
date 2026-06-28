@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drew & Sarah — NZ + Fiji 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #F8F6F2;
+    --card-bg:  #FFFFFF;
+    --text:     #2D2D2D;
+    --muted:    #9A9A9A;
+    --label:    #6A6A6A;
+    --border:   #E8E4DF;
+
+    --coral:    #C85A3C;
+    --amber:    #B87820;
+    --slate:    #3D72A0;
+    --teal:     #2E8E8E;
+    --forest:   #3A7E58;
+
+    --sage:     #4E9260;
+    --lavender: #6E5CA8;
+    --terra:    #A85530;
+    --plum:     #804E7C;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    padding: 48px 16px 80px;
+  }
+
+  .page { max-width: 680px; margin: 0 auto; }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 28px;
+    margin-bottom: 40px;
+  }
+
+  .trip-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  h1 { font-size: 32px; font-weight: 700; line-height: 1.1; margin-bottom: 8px; }
+
+  .meta { color: var(--label); font-size: 14px; display: flex; gap: 20px; flex-wrap: wrap; }
+
+  .timeline { display: flex; flex-direction: column; }
+
+  .day-block {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 0 20px;
+    position: relative;
+  }
+
+  .day-block::before {
+    content: '';
+    position: absolute;
+    left: 90px;
+    top: 24px;
+    bottom: -1px;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .day-block:last-child::before { display: none; }
+
+  .date-col { padding: 18px 0 0; text-align: right; }
+
+  .day-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+  }
+
+  .day-num { font-size: 26px; font-weight: 700; line-height: 1; }
+
+  .month {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+  }
+
+  .events-col {
+    padding: 14px 0 28px 28px;
+    position: relative;
+  }
+
+  .events-col::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 26px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 2px solid var(--bg);
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+    border-left-width: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+
+  .card:last-child { margin-bottom: 0; }
+
+  .c-coral    { border-left-color: var(--coral); }
+  .c-amber    { border-left-color: var(--amber); }
+  .c-slate    { border-left-color: var(--slate); }
+  .c-teal     { border-left-color: var(--teal); }
+  .c-forest   { border-left-color: var(--forest); }
+  .c-sage     { border-left-color: var(--sage); }
+  .c-lavender { border-left-color: var(--lavender); }
+  .c-terra    { border-left-color: var(--terra); }
+  .c-plum     { border-left-color: var(--plum); }
+
+  .card-type {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .c-coral    .card-type { color: var(--coral); }
+  .c-amber    .card-type { color: var(--amber); }
+  .c-slate    .card-type { color: var(--slate); }
+  .c-teal     .card-type { color: var(--teal); }
+  .c-forest   .card-type { color: var(--forest); }
+  .c-sage     .card-type { color: var(--sage); }
+  .c-lavender .card-type { color: var(--lavender); }
+  .c-terra    .card-type { color: var(--terra); }
+  .c-plum     .card-type { color: var(--plum); }
+
+  .route { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+
+  .iata {
+    font-family: 'Space Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .arrow-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    position: relative;
+  }
+
+  .arrow-line::after {
+    content: '▶';
+    font-size: 7px;
+    position: absolute;
+    right: -2px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+  }
+
+  .flight-details {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: var(--label);
+  }
+
+  .flight-details strong { color: var(--text); font-weight: 600; }
+
+  .flight-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .stay-name { font-weight: 600; font-size: 15px; margin-bottom: 3px; }
+
+  .stay-details { font-size: 13px; color: var(--label); line-height: 1.6; }
+
+  .note { font-size: 12px; color: var(--muted); margin-top: 4px; font-style: italic; }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="trip-label">Trip Itinerary · July 2026</div>
+    <h1>New Zealand + Fiji</h1>
+    <div class="meta">
+      <span>Andrew Wirkkala &amp; Sarah Menner</span>
+      <span>2 Jul – 28 Jul 2026</span>
+    </div>
+  </header>
+
+  <div class="timeline">
+
+    <!-- Jul 2 -->
+    <div class="day-block">
+      <div class="date-col">
+        <span class="day-name">Thu</span>
+        <span class="day-num">2</span>
+        <span class="month">Jul</span>
+      </div>
+      <div class="events-col">
+        <div class="card c-coral">
+          <div class="card-type">Flight</div>
+          <div class="flight-num">FJ811 · Fiji Airways · Ref: ELBIGW</div>
+          <div class="route">
+            <span class="iata">LAX</span>
+            <div class="arrow-line"></div>
+            <span class="iata">NAN</span>
+          </div>
+          <div class="flight-details">
+            <span><strong>Departs</strong> 11:55 PM</span>
+            <span><strong>Arrives</strong> Sat 4 Jul · 6:00 AM</span>
+          </div>
+          <div class="note">Los Angeles → Nadi · Crosses International Date Line</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jul 4 -->
+    <div class="day-block">
+      <div class="date-col">
+        <span class="day-name">Sat</span>
+        <span class="day-num">4</span>
+        <span class="month">Jul</span>
+      </div>
+      <div class="events-col">
+        <div class="card c-amber">
+          <div class="card-type">Flight</div>
+          <div class="flight-num">FJ411 · Fiji Airways · Ref: ELBIGW</div>
+          <div class="route">
+            <span class="iata">NAN</span>
+            <div class="arrow-line"></div>
+            <span class="iata">AKL</span>
+          </div>
+          <div class="flight-details">
+            <span><strong>Departs</strong> 9:30 AM</span>
+            <span><strong>Arrives</strong> 12:45 PM</span>
+          </div>
+          <div class="note">Nadi → Auckland</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jul 5 -->
+    <div class="day-block">
+      <div class="date-col">
+        <span class="day-name">Sun</span>
+        <span class="day-num">5</span>
+        <span class="month">Jul</span>
+      </div>
+      <div class="events-col">
+        <div class="card c-slate">
+          <div class="card-type">Flight</div>
+          <div class="flight-num">NZ5105 · Air New Zealand · Ref: Y5NKLH</div>
+          <div class="route">
+            <span class="iata">AKL</span>
+            <div class="arrow-line"></div>
+            <span class="iata">PMR</span>
+          </div>
+          <div class="flight-details">
+            <span><strong>Departs</strong> 5:55 PM</span>
+            <span><strong>Arrives</strong> 7:10 PM</span>
+            <span><strong>Check-in closes</strong> 5:25 PM</span>
+          </div>
+          <div class="note">Auckland → Palmerston North</div>
+        </div>
+        <div class="card c-sage">
+          <div class="card-type">Check-in · until 18 Jul</div>
+          <div class="stay-name">Penthouse Apartment — Maison Accommodation</div>
+          <div class="stay-details">
+            Queen Street Maddison Apartments<br>
+            Palmerston North, Manawatu-Wanganui 4410<br>
+            Check-in after 2:00 PM
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jul 10 -->
+    <div class="day-block">
+      <div class="date-col">
+        <span class="day-name">Thu</span>
+        <span class="day-num">10</span>
+        <span class="month">Jul</span>
+      </div>
+      <div class="events-col">
+        <div class="card c-lavender">
+          <div class="card-type">Check-in · until 12 Jul</div>
+          <div class="stay-name">Loft in Wellington — hosted by Mary</div>
+          <div class="stay-details">
+            Wellington<br>
+            Check-in after 3:00 PM
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jul 12 -->
+    <div class="day-block">
+      <div class="date-col">
+        <span class="day-name">Sat</span>
+        <span class="day-num">12</span>
+        <span class="month">Jul</span>
+      </div>
+      <div class="events-col">
+        <div class="card c-lavender">
+          <div class="card-type">Checkout</div>
+          <div class="stay-details">Loft in Wellington · by 11:00 AM</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jul 18 -->
+    <div class="day-block">
+      <div class="date-col">
+        <span class="day-name">Sat</span>
+        <span class="day-num">18</span>
+        <span class="month">Jul</span>
+      </div>
+      <div class="events-col">
+        <div class="card c-sage">
+          <div class="card-type">Checkout</div>
+          <div class="stay-details">Penthouse Apartment, Palmerston North · by 10:00 AM</div>
+        </div>
+        <div class="card c-slate">
+          <div class="card-type">Flight</div>
+          <div class="flight-num">NZ5177 · Air New Zealand · Ref: UU3Q8H</div>
+          <div class="route">
+            <span class="iata">PMR</span>
+            <div class="arrow-line"></div>
+            <span class="iata">CHC</span>
+          </div>
+          <div class="flight-details">
+            <span><strong>Departs</strong> 11:45 AM</span>
+            <span><strong>Arrives</strong> 1:10 PM</span>
+            <span><strong>Check-in closes</strong> 11:15 AM</span>
+          </div>
+          <div class="note">Palmerston North → Christchurch</div>
+        </div>
+        <div class="card c-terra">
+          <div class="card-type">Check-in · until 21 Jul</div>
+          <div class="stay-name">House in Christchurch — hosted by Yvette</div>
+          <div class="stay-details">
+            3/388 Montreal Street, Christchurch, Canterbury 8013<br>
+            Check-in after 4:00 PM
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jul 21 -->
+    <div class="day-block">
+      <div class="date-col">
+        <span class="day-name">Tue</span>
+        <span class="day-num">21</span>
+        <span class="month">Jul</span>
+      </div>
+      <div class="events-col">
+        <div class="card c-terra">
+          <div class="card-type">Checkout</div>
+          <div class="stay-details">House in Christchurch · by 10:00 AM</div>
+        </div>
+        <div class="card c-teal">
+          <div class="card-type">Flight</div>
+          <div class="flight-num">NZ659 · Air New Zealand · Ref: ALBPIH</div>
+          <div class="route">
+            <span class="iata">CHC</span>
+            <div class="arrow-line"></div>
+            <span class="iata">ZQN</span>
+          </div>
+          <div class="flight-details">
+            <span><strong>Departs</strong> 8:40 AM</span>
+            <span><strong>Arrives</strong> 9:40 AM</span>
+            <span><strong>Check-in closes</strong> 8:10 AM</span>
+          </div>
+          <div class="note">Christchurch → Queenstown</div>
+        </div>
+        <div class="card c-plum">
+          <div class="card-type">Check-in · until 24 Jul</div>
+          <div class="stay-name">Home in Queenstown — hosted by Janine</div>
+          <div class="stay-details">
+            259 Frankton Road, Queenstown<br>
+            Check-in 3:00 PM
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jul 24 -->
+    <div class="day-block">
+      <div class="date-col">
+        <span class="day-name">Fri</span>
+        <span class="day-num">24</span>
+        <span class="month">Jul</span>
+      </div>
+      <div class="events-col">
+        <div class="card c-plum">
+          <div class="card-type">Checkout</div>
+          <div class="stay-details">Home in Queenstown · by 11:00 AM</div>
+        </div>
+        <div class="card c-forest">
+          <div class="card-type">Flight</div>
+          <div class="flight-num">NZ620 · Air New Zealand · Ref: X3LA2H</div>
+          <div class="route">
+            <span class="iata">ZQN</span>
+            <div class="arrow-line"></div>
+            <span class="iata">AKL</span>
+          </div>
+          <div class="flight-details">
+            <span><strong>Departs</strong> 1:05 PM</span>
+            <span><strong>Arrives</strong> 2:55 PM</span>
+            <span><strong>Check-in closes</strong> 12:35 PM</span>
+          </div>
+          <div class="note">Queenstown → Auckland</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jul 25 -->
+    <div class="day-block">
+      <div class="date-col">
+        <span class="day-name">Sat</span>
+        <span class="day-num">25</span>
+        <span class="month">Jul</span>
+      </div>
+      <div class="events-col">
+        <div class="card c-amber">
+          <div class="card-type">Flight</div>
+          <div class="flight-num">FJ412 · Fiji Airways · Ref: ELBIGW</div>
+          <div class="route">
+            <span class="iata">AKL</span>
+            <div class="arrow-line"></div>
+            <span class="iata">NAN</span>
+          </div>
+          <div class="flight-details">
+            <span><strong>Departs</strong> 7:00 AM</span>
+            <span><strong>Arrives</strong> 10:10 AM</span>
+          </div>
+          <div class="note">Auckland → Nadi, Fiji</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jul 28 -->
+    <div class="day-block">
+      <div class="date-col">
+        <span class="day-name">Tue</span>
+        <span class="day-num">28</span>
+        <span class="month">Jul</span>
+      </div>
+      <div class="events-col">
+        <div class="card c-coral">
+          <div class="card-type">Flight — Journey Home</div>
+          <div class="flight-num">FJ810 · Fiji Airways · Ref: ELBIGW</div>
+          <div class="route">
+            <span class="iata">NAN</span>
+            <div class="arrow-line"></div>
+            <span class="iata">LAX</span>
+          </div>
+          <div class="flight-details">
+            <span><strong>Departs</strong> 9:40 PM</span>
+            <span><strong>Arrives</strong> 1:05 PM same day</span>
+          </div>
+          <div class="note">Nadi → Los Angeles · Arrives same calendar day (International Date Line)</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <span>Andrew Wirkkala + Sarah Menner · NZ + Fiji 2026</span>
+    <span>All times local to departure airport</span>
+  </footer>
+
+</div>
+</body>
+</html>
