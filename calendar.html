@@ -23,6 +23,8 @@
     --teal:     #2E8E8E;
     --forest:   #3A7E58;
     --sage:     #4E9260;
+    --lavender: #6E5CA8;
+    --terra:    #A85530;
     --plum:     #804E7C;
   }
 
@@ -161,7 +163,11 @@
     border-radius: 4px;
     padding: 3px 5px;
     word-break: break-word;
+    cursor: pointer;
+    transition: filter 0.12s ease;
   }
+
+  .chip:hover { filter: brightness(1.08); }
 
   .chip.flight { background: var(--coral); }
   .chip.stay   { background: var(--sage); }
@@ -171,6 +177,117 @@
     .cell { min-height: 76px; padding: 5px; }
     .chip { font-size: 9px; padding: 2px 4px; }
     .weekdays div { font-size: 8px; }
+  }
+
+  /* Timeline card (rendered inside the modal, mirrors index.html) */
+  .card {
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+    border-left-width: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+
+  .card:last-child { margin-bottom: 0; }
+
+  .c-coral    { border-left-color: var(--coral); }
+  .c-amber    { border-left-color: var(--amber); }
+  .c-slate    { border-left-color: var(--slate); }
+  .c-teal     { border-left-color: var(--teal); }
+  .c-forest   { border-left-color: var(--forest); }
+  .c-sage     { border-left-color: var(--sage); }
+  .c-lavender { border-left-color: var(--lavender); }
+  .c-terra    { border-left-color: var(--terra); }
+  .c-plum     { border-left-color: var(--plum); }
+
+  .card-type {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .c-coral    .card-type { color: var(--coral); }
+  .c-amber    .card-type { color: var(--amber); }
+  .c-slate    .card-type { color: var(--slate); }
+  .c-teal     .card-type { color: var(--teal); }
+  .c-forest   .card-type { color: var(--forest); }
+  .c-sage     .card-type { color: var(--sage); }
+  .c-lavender .card-type { color: var(--lavender); }
+  .c-terra    .card-type { color: var(--terra); }
+  .c-plum     .card-type { color: var(--plum); }
+
+  .route { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+
+  .iata {
+    font-family: 'Space Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .arrow-line { flex: 1; height: 1px; background: var(--border); position: relative; }
+
+  .arrow-line::after {
+    content: '▶';
+    font-size: 7px;
+    position: absolute;
+    right: -2px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+  }
+
+  .flight-details { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--label); }
+  .flight-details strong { color: var(--text); font-weight: 600; }
+
+  .flight-num { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+
+  .stay-name { font-weight: 600; font-size: 15px; margin-bottom: 3px; }
+  .stay-details { font-size: 13px; color: var(--label); line-height: 1.6; }
+  .note { font-size: 12px; color: var(--muted); margin-top: 4px; font-style: italic; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(45,45,45,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 1000;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal-box { width: 100%; max-width: 460px; }
+
+  .modal-date {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #fff;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-close {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
+    line-height: 1;
+    color: #fff;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 4px;
   }
 
   footer {
@@ -217,6 +334,16 @@
   </div>
 
   <div class="grid" id="grid"></div>
+
+  <div class="modal-overlay" id="modal">
+    <div class="modal-box">
+      <div class="modal-date">
+        <span id="modalDate"></span>
+        <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+      </div>
+      <div id="modalCards"></div>
+    </div>
+  </div>
 
   <footer>
     <span>Andrew Wirkkala + Sarah Menner · NZ + Fiji 2026</span>
@@ -270,15 +397,53 @@ for (let d = 1; d <= daysInMonth; d++) {
   num.textContent = d;
   cell.appendChild(num);
 
-  (EVENTS[d] || []).forEach(ev => {
+  (EVENTS[d] || []).forEach((ev, idx) => {
     const chip = document.createElement('div');
     chip.className = 'chip ' + ev.cat;
     chip.textContent = ev.label;
+    chip.addEventListener('click', () => openEvent(d, idx));
     cell.appendChild(chip);
   });
 
   grid.appendChild(cell);
 }
+
+// ---- Modal: pop out the matching timeline card ----
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const modal = document.getElementById('modal');
+const modalCards = document.getElementById('modalCards');
+const modalDate = document.getElementById('modalDate');
+let timelineCards = null;
+
+async function loadCards() {
+  if (timelineCards) return timelineCards;
+  const html = await fetch('index.html').then(r => r.text());
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  timelineCards = {};
+  doc.querySelectorAll('.day-block').forEach(block => {
+    const num = block.querySelector('.day-num')?.textContent.trim();
+    const cards = [...block.querySelectorAll('.events-col > .card')].map(c => c.outerHTML);
+    if (num) timelineCards[num] = cards;
+  });
+  return timelineCards;
+}
+
+async function openEvent(day, idx) {
+  const cards = await loadCards();
+  const card = (cards[String(day)] || [])[idx];
+  if (!card) return;
+  const wd = WEEKDAYS[new Date(YEAR, MONTH, day).getDay()];
+  modalDate.textContent = wd + ' ' + day + ' ' + MONTH_NAMES[MONTH] + ' ' + YEAR;
+  modalCards.innerHTML = card;
+  modal.classList.add('open');
+}
+
+function closeModal() { modal.classList.remove('open'); }
+
+document.getElementById('modalClose').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 </script>
 </body>
 </html>
