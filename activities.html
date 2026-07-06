@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Things to Do in Palmy & Region — Drew & Sarah</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #F8F6F2;
+    --card-bg:  #FFFFFF;
+    --text:     #2D2D2D;
+    --muted:    #9A9A9A;
+    --label:    #6A6A6A;
+    --border:   #E8E4DF;
+
+    --coral:    #C85A3C;
+    --amber:    #B87820;
+    --slate:    #3D72A0;
+    --teal:     #2E8E8E;
+    --forest:   #3A7E58;
+    --sage:     #4E9260;
+    --plum:     #804E7C;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    padding: 48px 16px 80px;
+  }
+
+  .page { max-width: 900px; margin: 0 auto; }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 28px;
+    margin-bottom: 24px;
+  }
+
+  .trip-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  h1 { font-size: 32px; font-weight: 700; line-height: 1.1; margin-bottom: 8px; }
+
+  .meta { color: var(--label); font-size: 14px; display: flex; gap: 20px; flex-wrap: wrap; }
+
+  nav {
+    margin-bottom: 32px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    display: flex;
+    gap: 22px;
+    flex-wrap: wrap;
+  }
+
+  nav a {
+    color: var(--slate);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  nav a:hover { text-decoration: underline; }
+
+  /* Map */
+  #map {
+    height: 420px;
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    margin-bottom: 28px;
+    z-index: 0;
+  }
+
+  .leaflet-popup-content-wrapper { border-radius: 10px; }
+  .leaflet-popup-content { margin: 0; font-family: 'Space Grotesk', sans-serif; }
+
+  .popup-card {
+    border-left: 4px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .popup-card .card-desc { margin-bottom: 10px; }
+  .popup-card .card-link { color: #fff; }
+
+  .base-marker {
+    background: #6A6A6A;
+    color: #fff;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+
+  /* Filters */
+  #filters {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .filter-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .filter-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--label);
+    min-width: 70px;
+  }
+
+  select {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+
+  .pill {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: lowercase;
+    color: var(--label);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .pill.active {
+    background: var(--slate);
+    color: #fff;
+    border-color: var(--slate);
+  }
+
+  .drive-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--label);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .drive-btn.active {
+    background: var(--text);
+    color: #fff;
+    border-color: var(--text);
+  }
+
+  .result-count {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* Cards grid */
+  #cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  @media (min-width: 640px) {
+    #cards { grid-template-columns: 1fr 1fr; }
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 16px 18px;
+    border: 1px solid var(--border);
+    border-left-width: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    scroll-margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .area-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .drive-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--label);
+    white-space: nowrap;
+  }
+
+  .card-name { font-size: 18px; font-weight: 700; line-height: 1.2; margin-bottom: 6px; }
+
+  .card-desc { font-size: 13px; color: var(--label); line-height: 1.5; margin-bottom: 12px; flex: 1; }
+
+  .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+
+  .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px 8px;
+  }
+
+  .card-link {
+    align-self: flex-start;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #fff;
+    padding: 7px 14px;
+    border-radius: 6px;
+  }
+
+  .no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    padding: 32px 0;
+  }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="trip-label">Things to Do · Palmerston North & Region</div>
+    <h1>Palmy & Beyond</h1>
+    <div class="meta">
+      <span>Andrew Wirkkala &amp; Sarah Menner</span>
+      <span>Based at Queen Street, Palmerston North · 5–18 Jul</span>
+    </div>
+  </header>
+
+  <nav>
+    <a href="index.html">&larr; Timeline</a>
+    <a href="calendar.html">Calendar View</a>
+  </nav>
+
+  <div id="map"></div>
+
+  <div id="filters">
+    <div class="filter-row">
+      <span class="filter-label">Area</span>
+      <select id="areaFilter">
+        <option value="all">All Areas</option>
+      </select>
+    </div>
+    <div class="filter-row">
+      <span class="filter-label">Drive</span>
+      <span class="drive-btn active" data-drive="all">All</span>
+      <span class="drive-btn" data-drive="u30">Under 30 min</span>
+      <span class="drive-btn" data-drive="30-60">30–60 min</span>
+      <span class="drive-btn" data-drive="60-90">1–2 hrs</span>
+      <span class="drive-btn" data-drive="o90">2 hrs+</span>
+    </div>
+    <div class="filter-row">
+      <span class="filter-label">Tags</span>
+      <span class="pill" data-tag="indoor">indoor</span>
+      <span class="pill" data-tag="outdoor">outdoor</span>
+      <span class="pill" data-tag="free">free</span>
+      <span class="pill" data-tag="night">night</span>
+      <span class="pill" data-tag="food & drink">food &amp; drink</span>
+    </div>
+  </div>
+
+  <div class="result-count" id="resultCount"></div>
+
+  <div id="cards"></div>
+
+  <footer>
+    <span>Andrew Wirkkala + Sarah Menner · NZ + Fiji 2026</span>
+    <span>Drive times approximate from Palmerston North</span>
+  </footer>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const BASE = { lat: -40.3572, lng: 175.6119 }; // Queen Street Maddison Apartments, Palmerston North
+
+const ACTIVITIES = [
+  // LOCAL
+  {
+    id: 1, name: "NZ Rugby Museum", area: "Local", drive: 5,
+    lat: -40.3571, lng: 175.6119,
+    desc: "The national rugby story in one building — interactive displays, memorabilia, and enough history to keep a non-fan interested.",
+    link: "https://rugbymuseum.co.nz",
+    tags: ["indoor", "museum"]
+  },
+  {
+    id: 2, name: "He Ara Kotahi Bridge", area: "Local", drive: 5,
+    lat: -40.3650, lng: 175.6200,
+    desc: "Riverside pedestrian bridge embedded with luminous stars, lit up at night. Easy evening walk from the apartment.",
+    link: "https://www.pncc.govt.nz/parks-and-recreation/parks-reserves-and-gardens/he-ara-kotahi",
+    tags: ["outdoor", "evening"]
+  },
+
+  // NORTHEAST
+  {
+    id: 3, name: "Manawatu Gorge Viewpoint", area: "Northeast", drive: 20,
+    lat: -40.2833, lng: 175.8000,
+    desc: "Short flat walk from the carpark to the gorge edge. Nikau palms, native bush, and the river below — without the 11km full track commitment.",
+    link: "https://www.doc.govt.nz/parks-and-recreation/places-to-go/manawatu-whanganui/places/manawatu-gorge-scenic-reserve/",
+    tags: ["outdoor", "viewpoint"]
+  },
+  {
+    id: 4, name: "Ashhurst Domain", area: "Northeast", drive: 20,
+    lat: -40.2872, lng: 175.7508,
+    desc: "54 hectares of parkland with sweeping views to the Te Apiti wind farm on the horizon. Flat, easy, great picnic spot.",
+    link: "https://www.pncc.govt.nz/parks-and-recreation/parks-reserves-and-gardens/ashhurst-domain",
+    tags: ["outdoor", "picnic"]
+  },
+  {
+    id: 5, name: "Te Apiti Wind Farm Lookout", area: "Northeast", drive: 30,
+    lat: -40.2333, lng: 175.8167,
+    desc: "Drive up Saddle Road to the lookout above the gorge. Turbines running overhead, plains stretching to the coast. Drive-to viewpoint, minimal walking.",
+    link: "https://www.meridianenergy.co.nz/about-us/our-power-stations/wind/te-apiti",
+    tags: ["outdoor", "viewpoint"]
+  },
+
+  // NORTH
+  {
+    id: 6, name: "Feilding", area: "North", drive: 30,
+    lat: -40.2333, lng: 175.5667,
+    desc: "NZ's most beautiful small town (three-time award winner). Heritage buildings, good coffee, and a Saturday morning farmers market worth timing your visit around.",
+    link: "https://www.feilding.co.nz",
+    tags: ["town", "market"]
+  },
+  {
+    id: 7, name: "Pohangina Valley Scenic Drive", area: "North", drive: 40,
+    lat: -40.1000, lng: 175.7500,
+    desc: "Drive the valley road through farmland and Ruahine foothills. The landscape shifts from flat plains to dramatic ranges. Stop at viewpoints, no real walking needed.",
+    link: "https://nzpocketguide.com/14-best-things-to-do-in-the-pohangina-valley/",
+    tags: ["outdoor", "scenic drive"]
+  },
+  {
+    id: 8, name: "Limestone Creek Glowworm Reserve", area: "North", drive: 50,
+    lat: -40.0820, lng: 175.9380,
+    desc: "Free, wild glowworm gorge near Apiti — a 10-15 min flat bush walk to a limestone cavern lit with blue-green light. No commercialisation. Dark enough on the way back for solid stargazing. Bring a torch.",
+    link: "https://nzpocketguide.com/14-best-things-to-do-in-the-pohangina-valley/",
+    tags: ["outdoor", "night", "glowworms", "stargazing"]
+  },
+  {
+    id: 9, name: "River Valley Lodge — Rangitikei Rafting", area: "North", drive: 90,
+    lat: -39.6833, lng: 175.8167,
+    desc: "White water rafting on the Rangitikei River, run from a working farm. Highly rated. Confirm winter availability before planning around it.",
+    link: "https://www.rivervalley.co.nz",
+    tags: ["outdoor", "adventure", "verify winter"]
+  },
+
+  // WEST
+  {
+    id: 10, name: "Foxton & Foxton Beach", area: "West", drive: 40,
+    lat: -40.4683, lng: 175.2833,
+    desc: "Pair the town (restored Dutch windmill, local history) with the beach (estuary wildlife, open west coast horizon). Very flat, easy going.",
+    link: "https://www.horowhenua.govt.nz/Visit/Beaches-and-rivers/Foxton-Beach",
+    tags: ["outdoor", "beach", "town"]
+  },
+  {
+    id: 11, name: "Foxton Dutch Windmill — De Molen", area: "West", drive: 40,
+    lat: -40.4667, lng: 175.2833,
+    desc: "A fully restored working Dutch windmill right in Foxton town. Quirky and photogenic. Worth 30 minutes before heading to the beach.",
+    link: "https://www.demolen.co.nz",
+    tags: ["indoor", "attraction"]
+  },
+  {
+    id: 12, name: "Himatangi Beach", area: "West", drive: 40,
+    lat: -40.3833, lng: 175.2167,
+    desc: "Remote, windswept west coast beach with almost zero development. Completely flat open horizon — one of the better night sky options in the region. Free beachfront parking.",
+    link: "https://www.horizons.govt.nz/managing-natural-resources/water/safe-swim-spot-locations/himatangi-beach",
+    tags: ["outdoor", "beach", "night", "stargazing"]
+  },
+
+  // NORTHWEST
+  {
+    id: 13, name: "Whanganui City", area: "Northwest", drive: 60,
+    lat: -39.9300, lng: 175.0472,
+    desc: "Durie Hill elevator and tower, Virginia Lake, art galleries, glass studios, Whanganui Regional Museum. Enough for a full day without leaving the flat urban streets.",
+    link: "https://www.whanganui.com",
+    tags: ["town", "museum", "indoor"]
+  },
+  {
+    id: 14, name: "Whanganui River Road Scenic Drive", area: "Northwest", drive: 60,
+    lat: -39.8833, lng: 175.0500,
+    desc: "79km of river, historic homesteads, Maori rock carvings and farm stays serving coffee. One of NZ's most scenic rural drives — do as much or as little as you like.",
+    link: "https://www.whanganui.com/see-and-do/whanganui-river-road",
+    tags: ["outdoor", "scenic drive"]
+  },
+
+  // SOUTH
+  {
+    id: 15, name: "Shannon & Owlcatraz", area: "South", drive: 20,
+    lat: -40.5500, lng: 175.3833,
+    desc: "Quaint small town with boutique shops and a quirky native bird park (Owlcatraz) on the edge of town. Easy 20-minute drive, good for a relaxed half-morning.",
+    link: "https://www.shannon.nz",
+    tags: ["town", "outdoor", "wildlife"]
+  },
+
+  // EAST — HAWKE'S BAY
+  {
+    id: 16, name: "Napier Art Deco Walk", area: "East — Hawke's Bay", drive: 120,
+    lat: -39.4917, lng: 176.9182,
+    desc: "One of the world's best-preserved Art Deco cities, rebuilt after the 1931 earthquake. Self-guided wander through the flat city centre — Daily Telegraph building, Masonic Hotel, Marine Parade.",
+    link: "https://www.artdeconapier.com/",
+    tags: ["outdoor", "architecture", "urban"]
+  },
+  {
+    id: 17, name: "Te Mata Peak", area: "East — Hawke's Bay", drive: 120,
+    lat: -39.6332, lng: 176.8765,
+    desc: "399m summit with 360-degree views across the Heretaunga Plains, Napier coastline, and on a clear day out to Ruapehu. Driveable to the top. Redwood forest section is worth a short wander.",
+    link: "https://www.tematapark.co.nz",
+    tags: ["outdoor", "viewpoint", "scenic drive"]
+  },
+  {
+    id: 18, name: "Hawke's Bay Wineries", area: "East — Hawke's Bay", drive: 120,
+    lat: -39.5968, lng: 176.8506,
+    desc: "30+ cellar doors across the region. Mission Estate (NZ's oldest winery, est. 1851) is the classic starting point. Craggy Range for views and food. Hawke's Bay is one of only 12 Great Wine Capitals of the World.",
+    link: "https://www.hawkesbaynz.com/eat-and-drink/wineries-and-cellar-doors",
+    tags: ["food & drink", "indoor"]
+  },
+  {
+    id: 19, name: "Arataki Honey", area: "East — Hawke's Bay", drive: 120,
+    lat: -39.6597, lng: 176.8830,
+    desc: "Free entry. Around 20 honey varietals to taste, interactive hive displays, and the chance to spot the queen. Easy crowd-pleaser between winery stops in Havelock North.",
+    link: "https://www.aratakihoneyhb.co.nz",
+    tags: ["food & drink", "indoor", "free"]
+  },
+  {
+    id: 20, name: "MTG Hawke's Bay Museum", area: "East — Hawke's Bay", drive: 120,
+    lat: -39.4934, lng: 176.9117,
+    desc: "Art, history, and the full 1931 earthquake story in one building on Napier's Marine Parade. Pairs well with the Art Deco walk next door.",
+    link: "https://www.mtghawkesbay.com",
+    tags: ["indoor", "museum"]
+  }
+];
+
+const AREA_COLOURS = {
+  "Local":              "#3A7E58",
+  "Northeast":          "#3D72A0",
+  "North":              "#2E8E8E",
+  "West":               "#C85A3C",
+  "Northwest":          "#B87820",
+  "South":              "#4E9260",
+  "East — Hawke's Bay": "#804E7C"
+};
+
+function driveText(d) {
+  if (d >= 60) {
+    const h = Math.floor(d / 60);
+    const m = d % 60;
+    return m ? h + 'h ' + m + 'm' : h + 'h';
+  }
+  return d + ' min';
+}
+
+function cardInnerHtml(a) {
+  const colour = AREA_COLOURS[a.area];
+  const tagsHtml = a.tags.map(t => '<span class="tag">' + t + '</span>').join('');
+  return (
+    '<div class="card-head">' +
+      '<span class="area-label" style="color:' + colour + '">' + a.area + '</span>' +
+      '<span class="drive-time">' + driveText(a.drive) + ' drive</span>' +
+    '</div>' +
+    '<div class="card-name">' + a.name + '</div>' +
+    '<div class="card-desc">' + a.desc + '</div>' +
+    '<div class="card-tags">' + tagsHtml + '</div>' +
+    '<a class="card-link" href="' + a.link + '" target="_blank" rel="noopener" ' +
+       'style="background:' + colour + '">Find out more</a>'
+  );
+}
+
+// ---- Map ----
+const map = L.map('map').setView([BASE.lat, BASE.lng], 9);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors',
+  maxZoom: 19
+}).addTo(map);
+
+ACTIVITIES.forEach(a => {
+  L.circleMarker([a.lat, a.lng], {
+    radius: 8,
+    fillColor: AREA_COLOURS[a.area],
+    color: '#fff',
+    weight: 2,
+    opacity: 1,
+    fillOpacity: 0.95
+  }).addTo(map).bindPopup(
+    '<div class="popup-card" style="border-left-color:' + AREA_COLOURS[a.area] + '">' +
+      cardInnerHtml(a) +
+    '</div>',
+    { maxWidth: 260, minWidth: 240 }
+  );
+});
+
+// Base marker (grey house icon via DivIcon)
+const baseIcon = L.divIcon({
+  className: '',
+  html: '<div class="base-marker" title="Your base">&#9750;</div>',
+  iconSize: [22, 22],
+  iconAnchor: [11, 11]
+});
+L.marker([BASE.lat, BASE.lng], { icon: baseIcon })
+  .addTo(map)
+  .bindPopup('<strong>Your base</strong><br>Queen Street Maddison Apartments<br>Palmerston North');
+
+// ---- Filters state ----
+const state = { area: 'all', drive: 'all', tags: new Set() };
+
+function driveMatch(d) {
+  switch (state.drive) {
+    case 'all':   return true;
+    case 'u30':   return d <= 30;
+    case '30-60': return d > 30 && d <= 60;
+    case '60-90': return d > 60 && d <= 90;
+    case 'o90':   return d > 90;
+  }
+  return true;
+}
+
+function matches(a) {
+  if (state.area !== 'all' && a.area !== state.area) return false;
+  if (!driveMatch(a.drive)) return false;
+  for (const t of state.tags) {
+    if (!a.tags.includes(t)) return false;
+  }
+  return true;
+}
+
+// ---- Cards ----
+const cardsEl = document.getElementById('cards');
+const countEl = document.getElementById('resultCount');
+
+const sorted = [...ACTIVITIES].sort((a, b) => a.drive - b.drive || a.area.localeCompare(b.area));
+
+sorted.forEach(a => {
+  const colour = AREA_COLOURS[a.area];
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.id = 'activity-' + a.id;
+  card.dataset.id = a.id;
+  card.style.borderLeftColor = colour;
+
+  card.innerHTML = cardInnerHtml(a);
+
+  cardsEl.appendChild(card);
+});
+
+const noResults = document.createElement('div');
+noResults.className = 'no-results';
+noResults.textContent = 'No activities match those filters.';
+noResults.style.display = 'none';
+cardsEl.appendChild(noResults);
+
+function render() {
+  let visible = 0;
+  ACTIVITIES.forEach(a => {
+    const el = document.getElementById('activity-' + a.id);
+    const show = matches(a);
+    el.style.display = show ? 'flex' : 'none';
+    if (show) visible++;
+  });
+  noResults.style.display = visible ? 'none' : 'block';
+  countEl.textContent = 'Showing ' + visible + ' of ' + ACTIVITIES.length + ' activities';
+}
+
+// ---- Filter controls ----
+const areaSelect = document.getElementById('areaFilter');
+Object.keys(AREA_COLOURS).forEach(area => {
+  const opt = document.createElement('option');
+  opt.value = area;
+  opt.textContent = area;
+  areaSelect.appendChild(opt);
+});
+areaSelect.addEventListener('change', () => {
+  state.area = areaSelect.value;
+  render();
+});
+
+document.querySelectorAll('.drive-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.drive-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.drive = btn.dataset.drive;
+    render();
+  });
+});
+
+document.querySelectorAll('.pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    const tag = pill.dataset.tag;
+    if (state.tags.has(tag)) {
+      state.tags.delete(tag);
+      pill.classList.remove('active');
+    } else {
+      state.tags.add(tag);
+      pill.classList.add('active');
+    }
+    render();
+  });
+});
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendar — Drew &amp; Sarah · NZ + Fiji 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #F8F6F2;
+    --card-bg:  #FFFFFF;
+    --text:     #2D2D2D;
+    --muted:    #9A9A9A;
+    --label:    #6A6A6A;
+    --border:   #E8E4DF;
+
+    --coral:    #C85A3C;
+    --amber:    #B87820;
+    --slate:    #3D72A0;
+    --teal:     #2E8E8E;
+    --forest:   #3A7E58;
+    --sage:     #4E9260;
+    --plum:     #804E7C;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    padding: 48px 16px 80px;
+  }
+
+  .page { max-width: 860px; margin: 0 auto; }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 28px;
+    margin-bottom: 24px;
+  }
+
+  .trip-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  h1 { font-size: 32px; font-weight: 700; line-height: 1.1; margin-bottom: 8px; }
+
+  .meta { color: var(--label); font-size: 14px; display: flex; gap: 20px; flex-wrap: wrap; }
+
+  nav {
+    margin-bottom: 32px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    display: flex;
+    gap: 22px;
+    flex-wrap: wrap;
+  }
+
+  nav a {
+    color: var(--slate);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  nav a:hover { text-decoration: underline; }
+
+  .month-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--label);
+    margin-bottom: 14px;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--label);
+  }
+
+  .legend span { display: flex; align-items: center; gap: 7px; }
+
+  .swatch { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+  .sw-flight { background: var(--coral); }
+  .sw-stay   { background: var(--sage); }
+  .sw-jr     { background: var(--slate); }
+  .sw-overlap { background: rgba(61,114,160,0.12); border: 1px solid rgba(61,114,160,0.35); }
+
+  /* Weekday header */
+  .weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .weekdays div {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    padding: 4px 0;
+  }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+
+  .cell {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    min-height: 96px;
+    padding: 7px 7px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cell.blank { background: transparent; border: none; }
+
+  .cell.overlap { background: rgba(61,114,160,0.06); }
+
+  .cell.today { box-shadow: 0 0 0 2px var(--slate); }
+
+  .daynum {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .cell.overlap .daynum { color: var(--slate); }
+
+  .chip {
+    font-size: 10px;
+    line-height: 1.25;
+    color: #fff;
+    border-radius: 4px;
+    padding: 3px 5px;
+    word-break: break-word;
+  }
+
+  .chip.flight { background: var(--coral); }
+  .chip.stay   { background: var(--sage); }
+  .chip.jr     { background: var(--slate); }
+
+  @media (max-width: 620px) {
+    .cell { min-height: 76px; padding: 5px; }
+    .chip { font-size: 9px; padding: 2px 4px; }
+    .weekdays div { font-size: 8px; }
+  }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="trip-label">Calendar · July 2026</div>
+    <h1>New Zealand + Fiji</h1>
+    <div class="meta">
+      <span>Andrew Wirkkala &amp; Sarah Menner</span>
+      <span>2 Jul – 28 Jul 2026</span>
+    </div>
+  </header>
+
+  <nav>
+    <a href="index.html">&larr; Timeline</a>
+    <a href="activities.html">Things to Do &rarr;</a>
+  </nav>
+
+  <div class="month-label">July 2026</div>
+
+  <div class="legend">
+    <span><span class="swatch sw-flight"></span> Flight</span>
+    <span><span class="swatch sw-stay"></span> Stay</span>
+    <span><span class="swatch sw-jr"></span> Jesse &amp; Ross</span>
+    <span><span class="swatch sw-overlap"></span> All four together</span>
+  </div>
+
+  <div class="weekdays">
+    <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    <span>Andrew Wirkkala + Sarah Menner · NZ + Fiji 2026</span>
+    <span>Jesse &amp; Ross join 13 – 24 Jul</span>
+  </footer>
+
+</div>
+
+<script>
+const YEAR = 2026;
+const MONTH = 6; // July (0-based)
+const OVERLAP = { start: 13, end: 24 }; // days all four are together
+const TODAY = new Date();
+
+const EVENTS = {
+  2:  [{ cat: 'flight', label: 'LAX → NAN' }],
+  4:  [{ cat: 'flight', label: 'NAN → AKL' }],
+  5:  [{ cat: 'flight', label: 'AKL → PMR' }, { cat: 'stay', label: 'Check in · Palmy' }],
+  10: [{ cat: 'stay', label: 'Check in · Wellington' }],
+  12: [{ cat: 'stay', label: 'Checkout · Wellington' }],
+  13: [{ cat: 'jr', label: 'J&R arrive · Palmy' }],
+  17: [{ cat: 'jr', label: 'J&R drive · PMR → CHC' }],
+  18: [{ cat: 'stay', label: 'Checkout · Palmy' }, { cat: 'flight', label: 'PMR → CHC' }, { cat: 'stay', label: 'Check in · Christchurch' }],
+  21: [{ cat: 'stay', label: 'Checkout · CHC' }, { cat: 'flight', label: 'CHC → ZQN' }, { cat: 'stay', label: 'Check in · Queenstown' }, { cat: 'jr', label: 'J&R drive · CHC → ZQN' }],
+  24: [{ cat: 'stay', label: 'Checkout · Queenstown' }, { cat: 'flight', label: 'ZQN → AKL' }, { cat: 'jr', label: 'J&R drive north' }],
+  25: [{ cat: 'flight', label: 'AKL → NAN' }],
+  28: [{ cat: 'flight', label: 'NAN → LAX' }]
+};
+
+const grid = document.getElementById('grid');
+const firstDay = new Date(YEAR, MONTH, 1).getDay();      // 0=Sun..6=Sat
+const lead = (firstDay + 6) % 7;                         // Monday-first leading blanks
+const daysInMonth = new Date(YEAR, MONTH + 1, 0).getDate();
+
+for (let i = 0; i < lead; i++) {
+  const b = document.createElement('div');
+  b.className = 'cell blank';
+  grid.appendChild(b);
+}
+
+for (let d = 1; d <= daysInMonth; d++) {
+  const cell = document.createElement('div');
+  cell.className = 'cell';
+  if (d >= OVERLAP.start && d <= OVERLAP.end) cell.classList.add('overlap');
+  if (TODAY.getFullYear() === YEAR && TODAY.getMonth() === MONTH && TODAY.getDate() === d) {
+    cell.classList.add('today');
+  }
+
+  const num = document.createElement('div');
+  num.className = 'daynum';
+  num.textContent = d;
+  cell.appendChild(num);
+
+  (EVENTS[d] || []).forEach(ev => {
+    const chip = document.createElement('div');
+    chip.className = 'chip ' + ev.cat;
+    chip.textContent = ev.label;
+    cell.appendChild(chip);
+  });
+
+  grid.appendChild(cell);
+}
+</script>
+</body>
+</html>
