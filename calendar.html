@@ -174,9 +174,22 @@
   .chip.jr     { background: var(--slate); }
 
   @media (max-width: 620px) {
-    .cell { min-height: 76px; padding: 5px; }
-    .chip { font-size: 9px; padding: 2px 4px; }
-    .weekdays div { font-size: 8px; }
+    /* Reclaim vertical space: trim header whitespace and drop repeated meta/footer */
+    body { padding: 24px 16px 40px; }
+    header { padding-bottom: 14px; margin-bottom: 16px; }
+    h1 { font-size: 26px; }
+    .meta { display: none; }
+    nav { margin-bottom: 18px; }
+    body footer { display: none; }
+
+    .cell { min-height: 58px; padding: 5px; gap: 3px; }
+    /* Compact chips: color-only bars, tap to reveal the full card */
+    .chip { font-size: 0; line-height: 0; height: 6px; padding: 0; border-radius: 3px; }
+    .weekdays div { font-size: 8px; letter-spacing: 0.05em; }
+    .daynum { font-size: 11px; }
+    .legend { gap: 9px 12px; font-size: 10px; margin-bottom: 14px; }
+    .swatch { width: 9px; height: 9px; }
+    .month-label { margin-bottom: 10px; }
   }
 
   /* Timeline card (rendered inside the modal, mirrors index.html) */
